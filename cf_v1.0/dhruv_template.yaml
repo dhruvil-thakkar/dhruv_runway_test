@@ -1,0 +1,11 @@
+Resources:
+  # a) Create a VPC
+  myVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true # let instances in the VPC get DNS hostnames
+      EnableDnsHostnames: true # allow DNS resolution
+      Tags:
+      - Key: Name
+        Value:  dhruv_cf_test_vpc

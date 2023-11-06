@@ -9,3 +9,63 @@ Resources:
       Tags:
       - Key: Name
         Value:  dhruv_cf_test_vpc
+  
+  myInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value:  dhruv_cf_test_ig
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref myInternetGateway
+      VpcId: !Ref myVPC
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref myVPC
+      Tags:
+        - Key: Name
+          Value: dhruv_cf_route_table
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref myInternetGateway
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+    #  AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.0.1.0/24
+    #  MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public_subnet_1
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  dhruvcftestinstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-00448a337adc93c05
+      InstanceType: t2.micro
+      #VpcId: !Ref myVPC
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: '0'
+          SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: dhruv_cf_test_instance

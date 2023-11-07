@@ -9,5 +9,5 @@ stacks:
     variables:
       BucketName: ${default tf_state_bucket_name::undefined}
       TableName: ${default tf_state_table_name::undefined}
-  dhruv-rw-test-stack:
-    template_path: templates/dhruv_template.yaml  # also supports json templates
+  dhruv_template:
+    template_path: templates/dhruv_template.yaml # also supports json templates

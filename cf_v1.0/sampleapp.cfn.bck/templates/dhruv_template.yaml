@@ -1,0 +1,113 @@
+Resources:
+  # a) Create a VPC
+  myVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true # let instances in the VPC get DNS hostnames
+      EnableDnsHostnames: true # allow DNS resolution
+      Tags:
+      - Key: Name
+        Value:  dhruv_cf_test_vpc
+  
+  myInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value:  dhruv_cf_test_ig
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref myInternetGateway
+      VpcId: !Ref myVPC
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref myVPC
+      Tags:
+        - Key: Name
+          Value: dhruv_cf_route_table
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref myInternetGateway
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+    #  AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.0.1.0/24
+    #  MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public_subnet_1
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  InstanceSecurityGroup:
+   Type: AWS::EC2::SecurityGroup
+   Properties:
+    GroupDescription: Allow http to client host
+    VpcId: !Ref myVPC
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+    SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+    Tags:
+      - Key: Name
+        Value: dhruv_cf_test_sg_http
+
+
+  dhruvcftestinstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-00448a337adc93c05
+      InstanceType: t2.micro
+      #VpcId: !Ref myVPC
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: '0'
+          SubnetId: !Ref PublicSubnet1
+          GroupSet: 
+            - !Ref InstanceSecurityGroup
+      Tags:
+        - Key: Name
+          Value: dhruv_cf_test_instance
+      UserData:
+        Fn::Base64: 
+          !Sub |
+              #!/bin/bash -ex
+              yum install nginx1 -y
+              echo "<h1>$(hostname)</h1>" >  /usr/share/nginx/html/index.html 
+              systemctl enable nginx
+              systemctl start nginx
+           # #!/bin/bash
+            #yum install -y httpd
+            #systemctl start httpd.service
+            #systemctl enable httpd.service
+            #echo ?Hello World from $(hostname -f)? > /var/www/html/index.html
+
+
+

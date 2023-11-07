@@ -56,6 +56,30 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet1
 
+  InstanceSecurityGroup:
+   Type: AWS::EC2::SecurityGroup
+   Properties:
+    GroupDescription: Allow http to client host
+    VpcId: !Ref myVPC
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+    SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+    Tags:
+      - Key: Name
+        Value: dhruv_cf_test_sg_http
+
+
   dhruvcftestinstance:
     Type: AWS::EC2::Instance
     Properties:
@@ -66,6 +90,24 @@ Resources:
         - AssociatePublicIpAddress: "true"
           DeviceIndex: '0'
           SubnetId: !Ref PublicSubnet1
+          GroupSet: 
+            - !Ref InstanceSecurityGroup
       Tags:
         - Key: Name
           Value: dhruv_cf_test_instance
+      UserData:
+        Fn::Base64: 
+          !Sub |
+              #!/bin/bash -ex
+              yum install nginx1 -y
+              echo "<h1>$(hostname)</h1>" >  /usr/share/nginx/html/index.html 
+              systemctl enable nginx
+              systemctl start nginx
+           # #!/bin/bash
+            #yum install -y httpd
+            #systemctl start httpd.service
+            #systemctl enable httpd.service
+            #echo ?Hello World from $(hostname -f)? > /var/www/html/index.html
+
+
+

@@ -1,3 +1,3 @@
-bucket = "S3BUCKETNAMEHERE"
+bucket = "dhruv-runway-test-useast1"
 region = "us-east-1"
-dynamodb_table = "TABLENAMEHERE"
+#dynamodb_table = "dhruv_runway_test"

@@ -1,5 +1,0 @@
-deployments:
-  - modules:
-      - sampleapp.tf
-  regions:
-    - us-east-1

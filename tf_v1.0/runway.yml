@@ -1,0 +1,7 @@
+deployments:
+  - modules:
+      - path: sampleapp.tf
+       # parameters:
+         #region: ${env region}
+    regions:
+      - us-east-1

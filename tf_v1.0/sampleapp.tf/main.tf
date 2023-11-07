@@ -7,7 +7,7 @@ terraform {
 
 # Variable definitions
 variable "region" {
-  
+  default = "us-east-1"
 }
 
 # Provider and access setup

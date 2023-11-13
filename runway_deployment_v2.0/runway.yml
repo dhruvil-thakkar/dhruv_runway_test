@@ -1,0 +1,7 @@
+---
+# See full syntax at https://docs.onica.com/projects/runway
+deployments:
+  - modules:
+      - 01-create-vpc
+    regions:
+      - us-east-1

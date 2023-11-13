@@ -16,7 +16,4 @@ provider "aws" {
   region = "${var.region}"
 }
 
-# Data and resources
-resource "aws_sqs_queue" "terraform_queue" {
-  delay_seconds = 90
-}
+
